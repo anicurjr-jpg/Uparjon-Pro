@@ -1,0 +1,163 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Stores user profile stats, balance indices and PII data.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Full name of the user."
+        },
+        "mobile": {
+          "type": "string",
+          "description": "11-digit mobile number."
+        },
+        "email": {
+          "type": "string",
+          "description": "Authenticated user email."
+        },
+        "membership": {
+          "type": "string",
+          "enum": ["free", "silver", "gold", "diamond"],
+          "description": "Subscription tier level."
+        },
+        "balance": {
+          "type": "number",
+          "description": "Current micro-wallet balance in Taka."
+        },
+        "totalEarned": {
+          "type": "number",
+          "description": "Lifetime amount earned in Taka."
+        },
+        "dailyTasksDone": {
+          "type": "number",
+          "description": "Count of tasks accomplished today."
+        },
+        "withdrawalsCount": {
+          "type": "number",
+          "description": "Total withdrawals triggered."
+        },
+        "referralCode": {
+          "type": "string",
+          "description": "Generated unique 7-digit alphanumeric referral promo code."
+        },
+        "totalReferrals": {
+          "type": "number",
+          "description": "Number of users referred."
+        },
+        "referralEarnings": {
+          "type": "number",
+          "description": "Lifetime referrals earnings."
+        },
+        "referredBy": {
+          "type": "string",
+          "description": "Optional referral code of the user who invited them."
+        },
+        "dailyEarned": {
+          "type": "number",
+          "description": "Total amount earned from tasks today."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date and time of profile creation."
+        }
+      },
+      "required": ["name", "mobile", "email", "membership", "balance", "totalEarned", "dailyTasksDone", "withdrawalsCount", "referralCode", "totalReferrals", "referralEarnings", "createdAt"]
+    },
+    "Withdrawal": {
+      "title": "Withdrawal",
+      "description": "User withdrawal payment request element.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Pending", "Approved", "Rejected"]
+        },
+        "amount": {
+          "type": "number"
+        },
+        "method": {
+          "type": "string",
+          "enum": ["bKash", "Nagad", "Rocket"]
+        },
+        "accountNo": {
+          "type": "string"
+        }
+      },
+      "required": ["id", "date", "status", "amount", "method", "accountNo"]
+    },
+    "Deposit": {
+      "title": "Deposit",
+      "description": "User deposit payment request element.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Pending", "Approved", "Rejected"]
+        },
+        "amount": {
+          "type": "number"
+        },
+        "method": {
+          "type": "string",
+          "enum": ["bKash", "Nagad", "Rocket"]
+        },
+        "senderMobile": {
+          "type": "string"
+        },
+        "transactionId": {
+          "type": "string"
+        }
+      },
+      "required": ["id", "date", "status", "amount", "method", "senderMobile", "transactionId"]
+    },
+    "Referral": {
+      "title": "Referral",
+      "description": "Public lookup mapping code to uid safely avoiding PII leaks.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Owner userId of the referral promo code."
+        },
+        "code": {
+          "type": "string",
+          "description": "The alphanumeric code."
+        }
+      },
+      "required": ["uid", "code"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Personal account information and stats."
+    },
+    "/users/{userId}/withdrawals/{withdrawId}": {
+      "schema": "Withdrawal",
+      "description": "Withdrawal logs for the individual user."
+    },
+    "/users/{userId}/deposits/{depositId}": {
+      "schema": "Deposit",
+      "description": "Deposit logs for the individual user."
+    },
+    "/referrals/{referralCode}": {
+      "schema": "Referral",
+      "description": "Secure mapping allowing promo code verification."
+    }
+  }
+}

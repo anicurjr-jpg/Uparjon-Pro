@@ -1,0 +1,6 @@
+{
+  "name": "Uparjon",
+  "description": "একটি আধুনিক, সুরক্ষিত ও নির্ভরযোগ্য মাইক্রো-টাস্ক উপার্জন এবং উইথড্রয়াল প্ল্যাটফর্ম।",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,158 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Default deny cybernet gate
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && (request.auth.token.email_verified == true || request.auth.token.firebase.sign_in_provider == 'google.com');
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Profile schema validation
+    function isValidUser(data) {
+      return data.keys().hasAll(["name", "mobile", "email", "membership", "balance", "totalEarned", "dailyTasksDone", "withdrawalsCount", "referralCode", "totalReferrals", "referralEarnings", "createdAt"])
+        && (data.keys().size() == 12 
+            || (data.keys().size() == 13 && (data.keys().hasAny(["referredBy", "dailyEarned"])))
+            || (data.keys().size() == 14 && data.keys().hasAll(["referredBy", "dailyEarned"])))
+        && data.name is string && data.name.size() <= 100
+        && data.mobile is string && data.mobile.matches('^01[0-9]{9}$')
+        && data.email is string && data.email.size() <= 128
+        && data.membership in ['free', 'silver', 'gold', 'diamond']
+        && data.balance is number && data.balance >= 0
+        && data.totalEarned is number && data.totalEarned >= 0
+        && data.dailyTasksDone is number && data.dailyTasksDone >= 0
+        && (!data.keys().hasAny(["dailyEarned"]) || (data.dailyEarned is number && data.dailyEarned >= 0))
+        && data.withdrawalsCount is number && data.withdrawalsCount >= 0
+        && data.referralCode is string && data.referralCode.size() <= 16
+        && data.totalReferrals is number && data.totalReferrals >= 0
+        && data.referralEarnings is number && data.referralEarnings >= 0
+        && (data.createdAt is timestamp || data.createdAt is string); // Allow both for integration ease
+    }
+
+    // Withdrawal schema validation
+    function isValidWithdrawal(data) {
+      return data.keys().hasAll(["id", "date", "status", "amount", "method", "accountNo"])
+        && data.keys().size() == 6
+        && data.id is string && data.id.size() <= 64
+        && data.date is string && data.date.size() <= 64
+        && data.status in ['Pending', 'Approved', 'Rejected']
+        && data.amount is number && data.amount > 0
+        && data.method in ['bKash', 'Nagad', 'Rocket']
+        && data.accountNo is string && data.accountNo.matches('^01[0-9]{9}$');
+    }
+
+    // Deposit schema validation
+    function isValidDeposit(data) {
+      return data.keys().hasAll(["id", "date", "status", "amount", "method", "senderMobile", "transactionId"])
+        && data.keys().size() == 7
+        && data.id is string && data.id.size() <= 64
+        && data.date is string && data.date.size() <= 64
+        && data.status in ['Pending', 'Approved', 'Rejected']
+        && data.amount is number && data.amount > 0
+        && data.method in ['bKash', 'Nagad', 'Rocket']
+        && data.senderMobile is string && data.senderMobile.matches('^01[0-9]{9}$')
+        && data.transactionId is string && data.transactionId.size() <= 64 && data.transactionId.size() >= 4;
+    }
+
+    // Collection matching blocks
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      
+      allow create: if isOwner(userId) && isValidUser(incoming()) 
+        && incoming().balance == 80 
+        && incoming().totalEarned == 80 
+        && incoming().dailyTasksDone == 0 
+        && incoming().withdrawalsCount == 0 
+        && incoming().totalReferrals == 0 
+        && incoming().referralEarnings == 0 
+        && incoming().membership == 'free'
+        && (!incoming().keys().hasAny(["dailyEarned"]) || incoming().dailyEarned == 0);
+
+      allow update: if isValidUser(incoming()) && (
+        (isOwner(userId) 
+          && incoming().createdAt == existing().createdAt
+          && incoming().referralCode == existing().referralCode
+          && (incoming().referredBy == existing().referredBy || !existing().keys().hasAny(["referredBy"]))
+          && incoming().email == existing().email
+          && incoming().mobile == existing().mobile
+          && incoming().name == existing().name
+          && (
+            // Action 1: Complete Task quiz reward
+            (incoming().diff(existing()).affectedKeys().hasOnly(['balance', 'totalEarned', 'dailyTasksDone', 'dailyEarned'])) ||
+            // Action 2: Cashout validation
+            (incoming().diff(existing()).affectedKeys().hasOnly(['balance', 'withdrawalsCount'])) ||
+            // Action 4: Premium Subscription level change (buy using balance or instant free/demo upgrade)
+            (incoming().diff(existing()).affectedKeys().hasOnly(['membership', 'dailyTasksDone', 'dailyEarned', 'balance'])) ||
+            (incoming().diff(existing()).affectedKeys().hasOnly(['membership', 'dailyTasksDone', 'dailyEarned'])) ||
+            // Action 5: Deposit increase balance
+            (incoming().diff(existing()).affectedKeys().hasOnly(['balance']))
+          )
+        ) || (
+          // Action 3: Referral invite earnings credited secure path
+          isSignedIn()
+          && incoming().balance == existing().balance + 20
+          && incoming().totalEarned == existing().totalEarned + 20
+          && incoming().totalReferrals == existing().totalReferrals + 1
+          && incoming().referralEarnings == existing().referralEarnings + 20
+          && incoming().diff(existing()).affectedKeys().hasOnly(['balance', 'totalEarned', 'totalReferrals', 'referralEarnings'])
+        )
+      );
+
+      // Withdrawal Subcollection matching rules
+      match /withdrawals/{withdrawId} {
+        allow list, get: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(withdrawId) && isValidWithdrawal(incoming()) && incoming().status == 'Pending';
+        allow update, delete: if false; // Lock logs state
+      }
+
+      // Deposit Subcollection matching rules
+      match /deposits/{depositId} {
+        allow list, get: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(depositId) && isValidDeposit(incoming()) && incoming().status == 'Pending';
+        allow update: if isOwner(userId) && isValidId(depositId) && isValidDeposit(incoming()) && (
+          // Allow simulation of deposit approval inside the sandbox/preview
+          incoming().status == 'Approved' && existing().status == 'Pending' && incoming().diff(existing()).affectedKeys().hasOnly(['status'])
+        );
+        allow delete: if false;
+      }
+    }
+
+    // Referral maps (No sensitive PII, lookup is public)
+    match /referrals/{referralCode} {
+      allow get: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(referralCode) && incoming().uid == request.auth.uid && incoming().code == referralCode;
+      allow update, delete: if false;
+    }
+
+    // Phone number to Email map (to allow lookups by mobile number before sign-in)
+    match /phoneToEmail/{phoneNumber} {
+      allow get: if true; // Public lookup of email address linked with mobile key
+      allow create: if isSignedIn() && incoming().uid == request.auth.uid && incoming().email == request.auth.token.email;
+      allow update, delete: if false;
+    }
+  }
+}
