@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import { 
   Building2, Landmark, Wallet, Clock, Check, AlertTriangle, ShieldCheck, 
-  HelpCircle, ArrowDownToLine, Loader2, Sparkles, Crown, ArrowRight 
+  HelpCircle, ArrowDownToLine, Loader2, Sparkles, Crown, ArrowRight, Send, Copy 
 } from 'lucide-react';
 import { UserStats, WithdrawLog } from '../types';
 import { MEMBERSHIPS_CONFIGS } from '../data/memberships';
@@ -31,6 +31,7 @@ export default function WithdrawPortal({ stats, withdrawals, onAddWithdrawal, on
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formFeedback, setFormFeedback] = useState<{ status: 'success' | 'error'; message: string } | null>(null);
+  const [copiedTelegram, setCopiedTelegram] = useState(false);
 
   const handleWithdrawSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,7 +110,7 @@ export default function WithdrawPortal({ stats, withdrawals, onAddWithdrawal, on
       onAddWithdrawal(newTxn);
       setFormFeedback({
         status: 'success',
-        message: `৳${amountVal} টাকা উত্তোলনের রিকোয়েস্ট সফলভাবে জমা হয়েছে।`
+        message: `৳${amountVal} টাকা উত্তোলনের রিকোয়েস্ট সফলভাবে জমা হয়েছে! দয়া করে ট্রানজেকশনের ও এই পেজের একটি স্ক্রিনশট এখনই স্ক্রিনশট নিয়ে নিচে দেওয়া আমাদের অফিশিয়াল টেলিগ্রাম সাপোর্টে পাঠিয়ে রাখুন ধন্যবাদ!`
       });
       
       // Reset form
@@ -143,6 +144,58 @@ export default function WithdrawPortal({ stats, withdrawals, onAddWithdrawal, on
         </div>
       </div>
 
+      {/* Telegram Support CTA Card */}
+      <div className="bg-sky-50 border border-sky-100 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+        <div className="space-y-1">
+          <h4 className="text-xs font-bold text-sky-950 flex items-center gap-1.5">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-500"></span>
+            </span>
+            উত্তোলন বা পেমেন্ট নিয়ে সমস্যা?
+          </h4>
+          <p className="text-[11px] text-sky-800 leading-relaxed max-w-[280px]">
+            টেলিগ্রাম লিংকটি ওপেন না হলে <strong>'লিংক কপি করুন'</strong> বোতামে ক্লিক করে লিংকটি কপি করে নতুন ট্যাবে অথবা টেলিগ্রাম অ্যাপে পেস্ট করে ওপেন করুন।
+          </p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <a
+            href="https://t.me/uparjonpro"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-sky-500 hover:bg-sky-600 active:scale-95 text-white font-bold text-[11px] px-3.5 py-2.5 rounded-xl transition-all shadow-sm flex items-center space-x-1.5"
+          >
+            <Send className="w-3.5 h-3.5 shrink-0" />
+            <span>টেলিগ্রাম সাপোর্ট</span>
+          </a>
+          <button
+            type="button"
+            onClick={() => {
+              navigator.clipboard.writeText('https://t.me/uparjonpro');
+              setCopiedTelegram(true);
+              setTimeout(() => setCopiedTelegram(false), 2000);
+            }}
+            className={`font-bold text-[11px] px-3 py-2.5 rounded-xl transition-all shadow-sm flex items-center space-x-1 border active:scale-95 ${
+              copiedTelegram
+                ? 'bg-emerald-500 border-emerald-500 text-white'
+                : 'bg-white hover:bg-gray-50 border-sky-200 text-sky-700 hover:text-sky-800'
+            }`}
+          >
+            {copiedTelegram ? (
+              <>
+                <Check className="w-3.5 h-3.5 shrink-0" />
+                <span>কপি হয়েছে!</span>
+              </>
+            ) : (
+              <>
+                <Copy className="w-3.5 h-3.5 shrink-0" />
+                <span>লিংক কপি করুন</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
       {/* Main Form container */}
       <div className="bg-white rounded-2xl p-5 border border-gray-150 shadow-xs">
         <h3 className="text-sm font-bold text-gray-800 mb-3.5 flex items-center gap-1.5 border-b border-gray-50 pb-2">
@@ -172,6 +225,17 @@ export default function WithdrawPortal({ stats, withdrawals, onAddWithdrawal, on
           /* ACTIVE FORM */
           <form onSubmit={handleWithdrawSubmit} className="space-y-4">
             
+            {/* Urgent guide instruction for screenshots */}
+            <div className="bg-amber-50/60 border border-amber-200 rounded-xl p-3 flex items-start space-x-2 text-[11px] text-amber-950 font-sans">
+              <span className="bg-amber-500 text-white rounded-full w-4.5 h-4.5 flex items-center justify-center text-[9px] font-bold shrink-0 mt-0.5">★</span>
+              <div className="space-y-0.5">
+                <p className="font-bold">জরুরী উইথড্র নিয়মাবলী:</p>
+                <p className="leading-relaxed">
+                  পেমেন্ট উত্তোলন বা উইথড্র রিকোয়েস্ট করার পর ভুল বা ত্রুটি এড়ানোর জন্য ট্রানজেকশন তালিকা থেকে আপনার রিকোয়েস্ট পেইজের একটি <strong>স্ক্রিনশট</strong> আমাদের অফিশিয়াল <strong>টেলিগ্রাম সাপোর্টে</strong> অবশ্যই পাঠিয়ে দেবেন। এতে দ্রুত যাচাই সম্পন্ন হয়ে থাকে।
+                </p>
+              </div>
+            </div>
+
             {/* Gateway selectors */}
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-gray-500">পেমেন্ট মেথড নির্বাচন করুন</label>

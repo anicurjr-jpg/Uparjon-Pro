@@ -32,12 +32,19 @@ export default function DepositPortal({
   const [txnId, setTxnId] = useState('');
   const [feedback, setFeedback] = useState<{ status: 'success' | 'error'; message: string } | null>(null);
   const [copiedNumber, setCopiedNumber] = useState(false);
+  const [copiedTelegram, setCopiedTelegram] = useState(false);
 
   // Suggested Admin Numbers
   const adminNumbers = {
-    bKash: '01755123456',
-    Nagad: '01855654321',
+    bKash: '01856584729',
+    Nagad: '01812762448',
     Rocket: '01955789123'
+  };
+
+  const formatAdminNumber = (num: string) => {
+    if (num === '01856584729') return '01856-584729';
+    if (num === '01812762448') return '01812-762448';
+    return num;
   };
 
   const handleCopyNumber = () => {
@@ -85,7 +92,7 @@ export default function DepositPortal({
       
       setFeedback({
         status: 'success',
-        message: `৳${parsedAmount} টাকা ডিপোজিট রিকোয়েস্ট সফলভাবে পাঠানো হয়েছে! ভেরিফিকেশনের জন্য অনুগ্রহ করে ৩-৫ সেকেন্ড অপেক্ষা করুন।`
+        message: `৳${parsedAmount} টাকা ডিপোজিট রিকোয়েস্ট সফলভাবে পাঠানো হয়েছে! দয়া করে এই পেইজের একটি স্ক্রিনশট এবং আপনার প্রেরক মোবাইল নম্বরটি (${cleanMobile}) এখনই নিচে দেওয়া আমাদের অফিশিয়াল টেলিগ্রাম সাপোর্টে পাঠিয়ে দিন ধন্যবাদ!`
       });
 
       // Reset fields
@@ -127,6 +134,58 @@ export default function DepositPortal({
         </div>
       </div>
 
+      {/* Telegram Support CTA Card */}
+      <div className="bg-sky-50 border border-sky-100 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+        <div className="space-y-1">
+          <h4 className="text-xs font-bold text-sky-950 flex items-center gap-1.5">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-500"></span>
+            </span>
+            রিচার্জ সংক্রান্ত কোনো সমস্যা?
+          </h4>
+          <p className="text-[11px] text-sky-800 leading-relaxed max-w-[280px]">
+            টেলিগ্রাম লিংকটি ওপেন না হলে <strong>'লিংক কপি করুন'</strong> বোতামে ক্লিক করে লিংকটি কপি করে নতুন ট্যাবে অথবা টেলিগ্রাম অ্যাপে পেস্ট করে ওপেন করুন।
+          </p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <a
+            href="https://t.me/uparjonpro"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-sky-500 hover:bg-sky-600 active:scale-95 text-white font-bold text-[11px] px-3.5 py-2.5 rounded-xl transition-all shadow-sm flex items-center space-x-1.5"
+          >
+            <Send className="w-3.5 h-3.5 shrink-0" />
+            <span>টেলিগ্রাম সাপোর্ট</span>
+          </a>
+          <button
+            type="button"
+            onClick={() => {
+              navigator.clipboard.writeText('https://t.me/uparjonpro');
+              setCopiedTelegram(true);
+              setTimeout(() => setCopiedTelegram(false), 2000);
+            }}
+            className={`font-bold text-[11px] px-3 py-2.5 rounded-xl transition-all shadow-sm flex items-center space-x-1 border active:scale-95 ${
+              copiedTelegram
+                ? 'bg-emerald-500 border-emerald-500 text-white'
+                : 'bg-white hover:bg-gray-50 border-sky-200 text-sky-700 hover:text-sky-800'
+            }`}
+          >
+            {copiedTelegram ? (
+              <>
+                <Check className="w-3.5 h-3.5 shrink-0" />
+                <span>কপি হয়েছে!</span>
+              </>
+            ) : (
+              <>
+                <Copy className="w-3.5 h-3.5 shrink-0" />
+                <span>লিংক কপি করুন</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
       {/* Main Instructions & Details Dashboard */}
       <div className="bg-white rounded-2xl p-5 border border-gray-150 shadow-xs space-y-4">
         
@@ -136,11 +195,11 @@ export default function DepositPortal({
         </h3>
 
         {/* Step List */}
-        <div className="bg-emerald-50/50 p-3.5 rounded-xl border border-emerald-150 space-y-2.5 text-xs text-emerald-900">
+        <div className="bg-emerald-50/50 p-3.5 rounded-xl border border-emerald-150 space-y-2.5 text-xs text-emerald-950">
           <div className="flex items-start space-x-2">
             <span className="bg-emerald-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">১</span>
             <p className="leading-relaxed font-sans">
-              নিচের যেকোনো একটি পেমেন্ট গেটওয়ে গেটওয়ে নির্বাচন করুন এবং আমাদের প্রদত্ত পার্সোনাল নম্বরে <strong>Send Money (সেন্ড মানি)</strong> করুন।
+              নিচের যেকোনো একটি পেমেন্ট গেটওয়ে নির্বাচন করুন এবং আমাদের প্রদত্ত পার্সোনাল নম্বরে <strong>Send Money (সেন্ড মানি)</strong> করুন।
             </p>
           </div>
           <div className="flex items-start space-x-2">
@@ -153,6 +212,12 @@ export default function DepositPortal({
             <span className="bg-emerald-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">৩</span>
             <p className="leading-relaxed font-sans">
               সাবমিট করার ৩-৫ সেকেন্ডের মধ্যে গেটওয়ে ট্রানজেকশন অটোমেটিক যাচাই করে আপনার ব্যালেন্সে টাকা যুক্ত করে দেবে!
+            </p>
+          </div>
+          <div className="flex items-start space-x-2 border-t border-emerald-150/80 pt-2.5 mt-1 bg-amber-50/50 p-2 rounded-lg border border-amber-200">
+            <span className="bg-amber-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">★</span>
+            <p className="leading-relaxed font-sans text-amber-950 font-bold">
+              <strong>জরুরী নির্দেশ:</strong> জমার রিকোয়েস্ট সাবমিট করার পর উক্ত পেমেন্ট পেজের একটি <strong>স্ক্রিনশট</strong> এবং আপনার প্রেরক <strong>মোবাইল নম্বরটি</strong> অবশ্যই আমাদের অফিশিয়াল <strong>টেলিগ্রাম সাপোর্টে</strong> পাঠিয়ে দিন যাতে দ্রুত পেমেন্ট ভেরিফাই বা অনুমোদন করা যায়।
             </p>
           </div>
         </div>
@@ -190,7 +255,7 @@ export default function DepositPortal({
             <div className="space-y-0.5">
               <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">আমাদের {method === 'bKash' ? 'বিকাশ' : method === 'Nagad' ? 'নগদ' : 'রকেট'} নম্বর (Personal)</span>
               <p className="text-sm font-mono font-bold text-gray-900 tracking-wider">
-                {adminNumbers[method]}
+                {formatAdminNumber(adminNumbers[method])}
               </p>
             </div>
             <button
