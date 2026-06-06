@@ -145,12 +145,12 @@ export default function Dashboard({ stats, onNavigateTab, onAddReferral }: Dashb
             <h3 className="text-sm font-bold">রেফারেল প্রোগ্রাম</h3>
           </div>
           <span className="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-mono font-medium">
-            বোনাস: ৳২০ প্রতি সফল জয়েনিং
+            বোনাস: ৳১৯৯ প্রতি সফল জয়েনিং
           </span>
         </div>
         
         <p className="text-xs text-gray-500 font-sans leading-relaxed">
-          আপনার রেফারেল কোড ব্যবহার করে বন্ধুরা রেজিস্টার করলে প্রতিজন থেকে পাবেন <span className="font-bold text-gray-805">৳২০ বোনাস</span>! বর্তমানে আপনার রেফারেল ডাটা নিম্নরূপ:
+          আপনার রেফারেল কোড ব্যবহার করে বন্ধুরা রেজিস্টার করলে প্রতিজন থেকে পাবেন <span className="font-bold text-gray-850">৳১৯৯ বোনাস</span>! বর্তমানে আপনার রেফারেল ডাটা নিম্নরূপ:
         </p>
 
         {/* Referral Tracker stats */}

@@ -245,13 +245,13 @@ export default function App() {
         uid: uid
       });
 
-      // If referred by a valid user, atomic reward user-to-user action of 20 Taka
+      // If referred by a valid user, atomic reward user-to-user action of 199 Taka
       if (refOwnerUid && refOwnerUid !== uid) {
         batch.update(doc(db, 'users', refOwnerUid), {
-          balance: increment(20),
-          totalEarned: increment(20),
+          balance: increment(199),
+          totalEarned: increment(199),
           totalReferrals: increment(1),
-          referralEarnings: increment(20)
+          referralEarnings: increment(199)
         });
       }
 
@@ -436,10 +436,10 @@ export default function App() {
 
       if (refOwnerUid) {
         batch.update(doc(db, 'users', refOwnerUid), {
-          balance: increment(20),
-          totalEarned: increment(20),
+          balance: increment(199),
+          totalEarned: increment(199),
           totalReferrals: increment(1),
-          referralEarnings: increment(20)
+          referralEarnings: increment(199)
         });
       }
 
@@ -991,7 +991,7 @@ export default function App() {
             onAddReferral={() => {
               setAlertNotification({
                 title: 'রেফার কোড শেয়ার করুন',
-                message: `আপনার রেফারেল কোড '${stats.referralCode}' শেয়ার করুন। বন্ধুরা রেজিস্ট্রেশন করলে আপনি পাবেন ৳২০ বোনাস!`,
+                message: `আপনার রেফারেল কোড '${stats.referralCode}' শেয়ার করুন। বন্ধুরা রেজিস্ট্রেশন করলে আপনি পাবেন ৳১৯৯ বোনাস!`,
                 type: 'info'
               });
             }}

@@ -114,10 +114,10 @@ service cloud.firestore {
         ) || (
           // Action 3: Referral invite earnings credited secure path
           isSignedIn()
-          && incoming().balance == existing().balance + 20
-          && incoming().totalEarned == existing().totalEarned + 20
+          && incoming().balance == existing().balance + 199
+          && incoming().totalEarned == existing().totalEarned + 199
           && incoming().totalReferrals == existing().totalReferrals + 1
-          && incoming().referralEarnings == existing().referralEarnings + 20
+          && incoming().referralEarnings == existing().referralEarnings + 199
           && incoming().diff(existing()).affectedKeys().hasOnly(['balance', 'totalEarned', 'totalReferrals', 'referralEarnings'])
         )
       );

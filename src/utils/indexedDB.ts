@@ -68,7 +68,7 @@ export const INITIAL_USER_STATS: UserStats = {
   withdrawalsCount: 0,
   referralCode: 'UP986AF',
   totalReferrals: 3,
-  referralEarnings: 60,
+  referralEarnings: 597,
 };
 
 export const INITIAL_WITHDRAWALS: WithdrawLog[] = [
